@@ -1,0 +1,33 @@
+---
+title: "Lab 4: LTER Network Data"
+subtitle: 'ESS 330 - Quantitative Reasoning'
+author:
+  - name: "Zachary Cramton"
+    url: "https://zcramton.github.io"
+    email: "ZCramton@colostate.edu"
+format: html
+execute:
+  echo: true
+toc: true
+---
+
+
+```{r}
+# Install LTER Data Sampler
+#remotes::install_github("lter/lterdatasampler")
+
+# Install necessary libraries
+library(tidyverse)
+library(ggpubr)
+library(lterdatasampler)
+library(car)
+library(visdat)
+
+# Retrieve the and_vertebrates data set
+?and_vertebrates
+
+# Explore data structure
+str(and_vertebrates)
+glimpse(and_vertebrates)
+```
+
