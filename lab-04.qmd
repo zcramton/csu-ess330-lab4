@@ -28,6 +28,157 @@ library(visdat)
 
 # Explore data structure
 str(and_vertebrates)
-glimpse(and_vertebrates)
+and_vertebrates %>% 
+  glimpse() %>% 
+  vis_dat()
+```
+
+## Guided Data Analysis
+```{r}
+# Guided Data Analysis
+and_vertebrates %>% 
+  filter(species == "Cutthroat trout") %>% 
+  drop_na(unittype) %>% 
+  count(unittype)
+
+trout_clean <- and_vertebrates %>% 
+  filter(species == "Cutthroat trout") %>%    # Filter for cutthroat
+  filter(unittype %in% c("C", "P", "SC")) %>%   # Filter for the 3 most abundant unittypes
+  drop_na(unittype, section)   # Drop NA values for unittype and section
+
+# Save Cutthroat trout table
+cont_table <- table(trout_clean$section, trout_clean$unittype)
+
+# Conduct chi-squared test on the Cutthroat trout data
+chisq.test(cont_table)
+
+# Plot the Cutthroat trout data
+
+# Bar plot
+trout_clean_barplot <- trout_clean %>% 
+  count(unittype, section) %>% 
+  ggbarplot(x = 'unittype', y = 'n',
+            fill = 'section',
+            palette = c("#00AFBB", "#E7B800"))
+
+# Box Plot
+trout_clean_boxplot <- trout_clean %>% 
+  drop_na(weight_g) %>% 
+  ggviolin(x = "section", y = "weight_g",
+           add = "boxplot",
+           color = "section",
+           palette = c("#00AFBB", "#E7B800"))
+  
+# T-Test Assumptions
+cc_weight <- trout_clean %>% 
+  filter(section == "CC") %>% 
+  pull(weight_g)
+
+og_weight <- trout_clean %>%  
+  filter(section == "OG") %>% 
+  pull(weight_g)
+
+var.test(cc_weight, og_weight)
+
+# Plot Histograms
+ggarrange(gghistogram(cc_weight, main = "Clear Cut"), gghistogram(og_weight, main = "Old Growth"))
+
+# Test log normalization
+var.test(log(cc_weight), log(og_weight))
+
+# Default t-test with log-normalized data
+t.test(log(trout_clean$weight_g) ~ trout_clean$section, var.equal = TRUE)
+
+# Welch Two Sample t-test
+t.test(trout_clean$weight_g ~ trout_clean$section, var.equal = FALSE)
+
+# Coastal Giant Salamander
+# Filter for salamander data
+sally_clean <- and_vertebrates %>% 
+  filter(species == "Coastal giant salamander") %>% 
+  drop_na(length_2_mm, weight_g)   # Remove NA values from the data.
+
+# Display salamander histograms
+ggarrange(gghistogram(sally_clean$length_2_mm, title = "Length"),
+gghistogram(sally_clean$weight_g, title = "Weight"))
+
+# Test for normal distribution
+s <- sally_clean  %>%  
+  slice_sample(n = 5000) 
+
+shapiro.test(s$length_2_mm)
+shapiro.test(s$weight_g)
+
+# Display log-normalized Salamander histograms
+ggarrange(
+ gghistogram(log(sally_clean$length_2_mm), title = "Length"), 
+ gghistogram(log(sally_clean$weight_g), title = "Weight") )
+
+# Correlation Test for Salamander Data
+cor.test(log(sally_clean$length_2_mm), log(sally_clean$weight_g))
+
+# Visualized correlation for Salamander Data
+sally_clean %>%
+  mutate(log_length = log(length_2_mm), log_weight = log(weight_g)) %>% 
+  ggscatter(x = 'log_length',
+            y = 'log_weight',
+            alpha = .35,
+            add = "loess")
+
+# Spearman Correlation Test for Salamander Data
+cor.test(sally_clean$length_2_mm, sally_clean$weight_g, method = "spearman")
+```
+
+# Lab Exercises: 
+## Part 1: Basic Statistics
+```{r}
+# Lab Exercise Pt. 1
+# Filter and clean salamander data
+sal_clean <- and_vertebrates %>% 
+  filter(species == "Coastal giant salamander") %>%    # Filter for salamanders
+  drop_na(unittype, section)   # Drop NA values for unittype and section
+
+# Save Salamander contingency table
+sal_cont_table <- table(sal_clean$section, sal_clean$unittype)
+
+
+# Chi-Sq Test for Section and Unittype
+sal_chisq_result <- chisq.test(sal_cont_table)
+
+# Print Tables
+print(sal_cont_table)
+print(sal_chisq_result)
+
+# T-Test Assumptions
+sal_cc_unittype <- sal_clean %>% 
+  filter(section == "CC") %>% 
+  pull(unittype)
+
+sal_og_unittype <- sal_clean %>%  
+  filter(section == "OG") %>% 
+  pull(unittype)
+
+var.test(sal_cc_unittype, sal_og_unittype)
+
+# Test for normal distribution
+sal <- sal_clean %>%  
+  slice_sample(n = 5000) 
+
+shapiro.test(sal$unittype)
+shapiro.test(sal$section)
+
+# Test log normalization
+var.test(log(sal_cc_unittype), log(sal_og_unittype))
+
+# Default t-test with log-normalized data
+t.test(log(sal_clean$unittype) ~ sal_clean$section, var.equal = TRUE)
+
+# Welch Two Sample t-test
+t.test(sal_clean$unittype ~ sal_clean$section, var.equal = FALSE)
+```
+
+## Part 2: Multivariate Statistics
+```{r}
+
 ```
 
