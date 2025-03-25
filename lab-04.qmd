@@ -5,10 +5,12 @@ author:
   - name: "Zachary Cramton"
     url: "https://zcramton.github.io"
     email: "ZCramton@colostate.edu"
-format: html
 execute:
   echo: true
 toc: true
+format:
+  html:
+    self-contained: true
 ---
 
 ## Introduction to the Data
